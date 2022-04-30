@@ -1,0 +1,218 @@
+
+## <summary>policy for connman</summary>
+
+########################################
+## <summary>
+##	Execute connman_exec_t in the connman domain.
+## </summary>
+## <param name="domain">
+## <summary>
+##	Domain allowed to transition.
+## </summary>
+## </param>
+#
+interface(`connman_domtrans',`
+	gen_require(`
+		type connman_t, connman_exec_t;
+	')
+
+	corecmd_search_bin($1)
+	domtrans_pattern($1, connman_exec_t, connman_t)
+')
+
+######################################
+## <summary>
+##	Execute connman in the caller domain.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`connman_exec',`
+	gen_require(`
+		type connman_exec_t;
+	')
+
+	corecmd_search_bin($1)
+	can_exec($1, connman_exec_t)
+')
+
+########################################
+## <summary>
+##	Search connman lib directories.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`connman_search_lib',`
+	gen_require(`
+		type connman_var_lib_t;
+	')
+
+	allow $1 connman_var_lib_t:dir search_dir_perms;
+	files_search_var_lib($1)
+')
+
+########################################
+## <summary>
+##	Read connman lib files.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`connman_read_lib_files',`
+	gen_require(`
+		type connman_var_lib_t;
+	')
+
+	files_search_var_lib($1)
+	read_files_pattern($1, connman_var_lib_t, connman_var_lib_t)
+')
+
+########################################
+## <summary>
+##	Manage connman lib files.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`connman_manage_lib_files',`
+	gen_require(`
+		type connman_var_lib_t;
+	')
+
+	files_search_var_lib($1)
+	manage_files_pattern($1, connman_var_lib_t, connman_var_lib_t)
+')
+
+########################################
+## <summary>
+##	Manage connman lib directories.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`connman_manage_lib_dirs',`
+	gen_require(`
+		type connman_var_lib_t;
+	')
+
+	files_search_var_lib($1)
+	manage_dirs_pattern($1, connman_var_lib_t, connman_var_lib_t)
+')
+
+########################################
+## <summary>
+##	Read connman PID files.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`connman_read_pid_files',`
+	gen_require(`
+		type connman_var_run_t;
+	')
+
+	files_search_pids($1)
+	read_files_pattern($1, connman_var_run_t, connman_var_run_t)
+')
+
+
+########################################
+## <summary>
+##	All of the rules required to administrate
+##	an connman environment
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+## <param name="role">
+##	<summary>
+##	Role allowed access.
+##	</summary>
+## </param>
+## <rolecap/>
+#
+interface(`connman_admin',`
+	gen_require(`
+		type connman_t;
+		type connman_var_lib_t;
+		type connman_var_run_t;
+	')
+
+	allow $1 connman_t:process { signal_perms };
+	ps_process_pattern($1, connman_t)
+
+    tunable_policy(`deny_ptrace',`',`
+        allow $1 connman_t:process ptrace;
+    ')
+
+	files_search_var_lib($1)
+	admin_pattern($1, connman_var_lib_t)
+
+	files_search_pids($1)
+	admin_pattern($1, connman_var_run_t)
+	optional_policy(`
+		systemd_passwd_agent_exec($1)
+		systemd_read_fifo_file_passwd_run($1)
+	')
+')
+
+########################################
+## <summary>
+##      Send and receive messages from
+##      connman over dbus.
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain allowed access.
+##      </summary>
+## </param>
+#
+interface(`connman_dbus_chat',`
+        gen_require(`
+		type connman_t;
+		class dbus send_msg;
+	')
+
+	allow $1 connman_t:dbus send_msg;
+	allow connman_t $1:dbus send_msg;
+')
+
+########################################
+## <summary>
+##      Allow the specified domain unconfined accesses to manage network 
+##      with connman console
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain allowed access.
+##      </summary>
+## </param>
+#
+interface(`connman_unconfined',`
+        gen_require(`
+                attribute connman_unconfined_type;
+        ')
+
+        typeattribute $1 connman_unconfined_type;
+')

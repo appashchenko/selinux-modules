@@ -1,0 +1,95 @@
+
+## <summary>policy for sway</summary>
+
+########################################
+## <summary>
+##	Execute sway_exec_t in the sway domain.
+## </summary>
+## <param name="domain">
+## <summary>
+##	Domain allowed to transition.
+## </summary>
+## </param>
+#
+interface(`sway_domtrans',`
+	gen_require(`
+		type sway_t, sway_exec_t;
+	')
+
+	corecmd_search_bin($1)
+	domtrans_pattern($1, sway_exec_t, sway_t)
+')
+
+######################################
+## <summary>
+##	Execute sway in the caller domain.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`sway_exec',`
+	gen_require(`
+		type sway_exec_t;
+	')
+
+	corecmd_search_bin($1)
+	can_exec($1, sway_exec_t)
+')
+
+########################################
+## <summary>
+##	Execute sway in the sway domain, and
+##	allow the specified role the sway domain.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed to transition
+##	</summary>
+## </param>
+## <param name="role">
+##	<summary>
+##	The role to be allowed the sway domain.
+##	</summary>
+## </param>
+#
+interface(`sway_run',`
+	gen_require(`
+		type sway_t;
+		attribute_role sway_roles;
+	')
+
+	sway_domtrans($1)
+	roleattribute $2 sway_roles;
+')
+
+########################################
+## <summary>
+##	Role access for sway
+## </summary>
+## <param name="role">
+##	<summary>
+##	Role allowed access
+##	</summary>
+## </param>
+## <param name="domain">
+##	<summary>
+##	User domain for the role
+##	</summary>
+## </param>
+#
+interface(`sway_role',`
+	gen_require(`
+		type sway_t;
+		attribute_role sway_roles;
+	')
+
+	roleattribute $1 sway_roles;
+
+	sway_domtrans($2)
+
+	ps_process_pattern($2, sway_t)
+	allow $2 sway_t:process { signull signal sigkill };
+')

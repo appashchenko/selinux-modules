@@ -1,0 +1,52 @@
+policy_module(seatd)
+
+########################################
+#
+# Declarations
+#
+
+type seatd_t;
+type seatd_exec_t;
+init_daemon_domain(seatd_t, seatd_exec_t)
+application_executable_file(seatd_exec_t)
+
+type seatd_initrc_exec_t;
+init_script_file(seatd_initrc_exec_t)
+
+type seatd_tmp_t;
+files_tmp_file(seatd_tmp_t)
+
+type seatd_tmpfs_t;
+files_tmpfs_file(seatd_tmpfs_t)
+
+type seatd_runtime_t alias seatd_var_run_t;
+files_runtime_file(seatd_runtime_t)
+#init_daemon_runtime_file(seatd_runtime_t, file, "seatd.pid")
+
+########################################
+#
+# Local policy
+#
+
+allow seatd_t self:capability { sys_tty_config dac_override sys_admin chown };
+#allow seatd_t self:process { rlimitinh siginh signal };
+allow seatd_t self:sock_file { create unlink };
+allow seatd_t self:fifo_file manage_fifo_file_perms;
+#allow seatd_t self:unix_stream_socket { accept connectto listen create_stream_socket_perms };
+allow seatd_t seatd_runtime_t:sock_file manage_sock_file_perms;
+
+
+# modules/system/userdomain.if
+term_use_unallocated_ttys(seatd_t)
+#userdom_application_exec_domain(seatd_t)
+userdom_use_user_ttys(seatd_t)
+
+files_runtime_filetrans(seatd_t, seatd_runtime_t, { dir file sock_file })
+
+auth_use_nsswitch(seatd_t)
+dev_read_sysfs(seatd_t)
+kernel_search_proc(seatd_t)
+dev_rw_input_dev(seatd_t)
+dev_ioctl_input_dev(seatd_t)
+dev_rw_dri(seatd_t)
+dev_ioctl_dri_dev(seatd_t)

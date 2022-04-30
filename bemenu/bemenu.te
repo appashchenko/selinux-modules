@@ -1,0 +1,9 @@
+policy_module(bemenu, 1.0.0)
+
+type bemenu_t;
+type bemenu_exec_t;
+
+application_domain(bemenu_t, bemenu_exec_t)
+corecmd_exec_bin(bemenu_t)
+libs_use_ld_so(bemenu_t)
+fs_getattr_xattr_fs(bemenu_t)

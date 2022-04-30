@@ -1,0 +1,9 @@
+/usr/bin/connmanctl		--	gen_context(system_u:object_r:connman_exec_t,s0)
+/usr/sbin/connmand		--	gen_context(system_u:object_r:connman_exec_t,s0)
+/usr/sbin/connmand-wait-online	--	gen_context(system_u:object_r:connman_exec_t,s0)
+/var/lib/connman(/.*)?			gen_context(system_u:object_r:connman_var_lib_t,s0)
+/run/connman			-d	gen_context(system_u:object_r:connman_runtime_t,s0)
+/etc/connman/main.conf			gen_context(system_u:object_r:connman_etc_t,s0)
+/etc/rc\.d/init\.d/connman		gen_context(system_u:object_r:connman_initrc_exec_t,s0)
+/etc/resolv.conf		-l	gen_context(system_u:object_r:etc_t,s0)
+

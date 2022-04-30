@@ -1,0 +1,48 @@
+
+## <summary>policy for seatd</summary>
+
+########################################
+## <summary>
+##	Execute seatd_exec_t in the seatd domain.
+## </summary>
+## <param name="domain">
+## <summary>
+##	Domain allowed to transition.
+## </summary>
+## </param>
+#
+interface(`seatd_domtrans',`
+	gen_require(`
+		type seatd_t, seatd_exec_t;
+	')
+
+	corecmd_search_bin($1)
+	domtrans_pattern($1, seatd_exec_t, seatd_t)
+')
+
+######################################
+## <summary>
+##	Execute seatd in the caller domain.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`seatd_exec',`
+	gen_require(`
+		type seatd_exec_t;
+	')
+
+	corecmd_search_bin($1)
+	can_exec($1, seatd_exec_t)
+')
+
+interface(`seatd_ro_socket',`
+	gen_require(`
+		type seatd_runtime_t;
+	')
+
+	allow $1 seatd_runtime_t:socket { open read };
+')

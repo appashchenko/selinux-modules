@@ -1,0 +1,5 @@
+/opt/discord			-d	gen_context(system_u:object_r:discord_opt_t,s0)
+/opt/discord/Discord		--	gen_context(system_u:object_r:discord_exec_t,s0)
+/opt/discord/DiscordPTB		--	gen_context(system_u:object_r:discord_exec_t,s0)
+HOME_DIR/\.config/discord(/.*)?		gen_context(system_u:object_r:discord_conf_t,s0)
+

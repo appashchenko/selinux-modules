@@ -1,0 +1,206 @@
+
+## <summary>policy for iwd</summary>
+
+########################################
+## <summary>
+##	Execute iwd_exec_t in the iwd domain.
+## </summary>
+## <param name="domain">
+## <summary>
+##	Domain allowed to transition.
+## </summary>
+## </param>
+#
+interface(`iwd_domtrans',`
+	gen_require(`
+		type iwd_t, iwd_exec_t;
+	')
+
+	corecmd_search_bin($1)
+	domtrans_pattern($1, iwd_exec_t, iwd_t)
+')
+
+######################################
+## <summary>
+##	Execute iwd in the caller domain.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`iwd_exec',`
+	gen_require(`
+		type iwd_exec_t;
+	')
+
+	corecmd_search_bin($1)
+	can_exec($1, iwd_exec_t)
+')
+
+########################################
+## <summary>
+##	Search iwd lib directories.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`iwd_search_lib',`
+	gen_require(`
+		type iwd_var_lib_t;
+	')
+
+	allow $1 iwd_var_lib_t:dir search_dir_perms;
+	files_search_var_lib($1)
+')
+
+########################################
+## <summary>
+##	Read iwd lib files.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`iwd_read_lib_files',`
+	gen_require(`
+		type iwd_var_lib_t;
+	')
+
+	files_search_var_lib($1)
+	read_files_pattern($1, iwd_var_lib_t, iwd_var_lib_t)
+')
+
+########################################
+## <summary>
+##	Manage iwd lib files.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`iwd_manage_lib_files',`
+	gen_require(`
+		type iwd_var_lib_t;
+	')
+
+	files_search_var_lib($1)
+	manage_files_pattern($1, iwd_var_lib_t, iwd_var_lib_t)
+')
+
+########################################
+## <summary>
+##	Manage iwd lib directories.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`iwd_manage_lib_dirs',`
+	gen_require(`
+		type iwd_var_lib_t;
+	')
+
+	files_search_var_lib($1)
+	manage_dirs_pattern($1, iwd_var_lib_t, iwd_var_lib_t)
+')
+
+########################################
+## <summary>
+##	Read iwd PID files.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`iwd_read_pid_files',`
+	gen_require(`
+		type iwd_var_run_t;
+	')
+
+	files_search_pids($1)
+	read_files_pattern($1, iwd_var_run_t, iwd_var_run_t)
+')
+
+
+########################################
+## <summary>
+##	All of the rules required to administrate
+##	an iwd environment
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+## <param name="role">
+##	<summary>
+##	Role allowed access.
+##	</summary>
+## </param>
+## <rolecap/>
+#
+interface(`iwd_admin',`
+	gen_require(`
+		type iwd_t;
+		type iwd_var_lib_t;
+		type iwd_var_run_t;
+	')
+
+	allow $1 iwd_t:process { signal_perms };
+	allow $1 iwd_t:dbus { send_msg };
+	ps_process_pattern($1, iwd_t)
+
+    tunable_policy(`deny_ptrace',`',`
+        allow $1 iwd_t:process ptrace;
+    ')
+
+	files_search_var_lib($1)
+	admin_pattern($1, iwd_var_lib_t)
+
+	files_search_pids($1)
+	admin_pattern($1, iwd_var_run_t)
+	optional_policy(`
+		systemd_passwd_agent_exec($1)
+		systemd_read_fifo_file_passwd_run($1)
+	')
+')
+
+interface(`iwd_read_hwdb',`
+	gen_require(`
+		type systemd_hwdb_t;
+		type sysctl_net_t;
+	')
+	allow iwd_t systemd_hwdb_t:file { read open getattr map };
+')
+
+########################################
+## <summary>
+##      Allow the specified domain unconfined accesses to manage network 
+##      with iwd console
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain allowed access.
+##      </summary>
+## </param>
+#
+interface(`iwd_unconfined',`
+       	gen_require(`
+               	attribute iwd_unconfined_type;
+        ')
+
+        typeattribute $1 iwd_unconfined_type;
+')

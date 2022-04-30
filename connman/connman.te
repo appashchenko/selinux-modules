@@ -1,0 +1,100 @@
+policy_module(connman)
+
+########################################
+#
+# Declarations
+#
+
+attribute_role connman_roles;
+
+attribute connman_unconfined_type;
+attribute connman_trusted_procedure_type;
+
+type connman_t;
+type connman_exec_t;
+init_daemon_domain(connman_t, connman_exec_t)
+
+#application_executable_file(connman_exec_t)
+
+type connman_etc_t;
+files_config_file(connman_etc_t)
+
+type connman_var_lib_t;
+files_type(connman_var_lib_t)
+
+type connman_runtime_t;
+files_runtime_file(connman_runtime_t)
+init_daemon_runtime_file(connman_runtime_t, dir, "connman")
+
+type connman_initrc_exec_t;
+init_script_file(connman_initrc_exec_t)
+
+type connman_trusted_proc_t;
+domain_type(connman_trusted_proc_t)
+connman_unconfined(connman_trusted_proc_t)
+role system_r types connman_trusted_proc_t;
+role connman_roles types connman_t;
+########################################
+#
+# Local policy
+#
+allow connman_t self:capability { sys_admin net_admin net_bind_service net_raw };
+allow connman_t self:tcp_socket { create_socket_perms listen };
+allow connman_t self:udp_socket create_socket_perms;
+allow connman_t self:unix_dgram_socket { ioctl create connect };
+allow connman_t self:netlink_netfilter_socket { create bind getattr write read  };
+allow connman_t self:netlink_route_socket create_netlink_socket_perms;
+allow connman_t self:packet_socket create_socket_perms;
+allow connman_t self:rawip_socket { create setopt getattr write read };
+allow connman_t connman_runtime_t:dir { search };
+allow connman_t connman_var_lib_t:dir { watch };
+
+gen_require(`
+	type getty_t;
+')
+dontaudit getty_t connman_etc_t:dir search;
+
+files_runtime_filetrans(connman_t, connman_runtime_t, { dir file })
+files_manage_etc_symlinks(connman_t)
+files_watch_etc_dirs(connman_t)
+files_read_etc_files(connman_t)
+
+manage_dirs_pattern(connman_t, connman_etc_t, connman_etc_t)
+manage_files_pattern(connman_t, connman_etc_t, connman_etc_t)
+
+manage_dirs_pattern(connman_t, connman_var_lib_t, connman_var_lib_t)
+manage_files_pattern(connman_t, connman_var_lib_t, connman_var_lib_t)
+
+kernel_rw_net_sysctls(connman_t)
+kernel_read_network_state(connman_t)
+kernel_read_system_state(connman_t)
+kernel_read_kernel_sysctls(connman_t)
+kernel_request_load_module(connman_t)
+sysnet_manage_config(connman_t)
+
+dev_rw_sysfs(connman_t)
+dev_read_rand(connman_t)
+dev_read_urand(connman_t)
+dev_rw_wireless(connman_t)
+dev_getattr_generic_blk_files(connman_t)
+dev_getattr_all_chr_files(connman_t)
+dev_read_generic_symlinks(connman_t)
+
+corenet_tcp_bind_dns_port(connman_t)
+corenet_tcp_bind_generic_node(connman_t)
+corenet_udp_bind_dns_port(connman_t)
+corenet_udp_bind_generic_node(connman_t)
+corenet_udp_bind_dhcpc_port(connman_t)
+corenet_sendrecv_dhcpc_server_packets(connman_t)
+
+miscfiles_read_localization(connman_t)
+
+dbus_system_domain(connman_t, connman_exec_t)
+dbus_connect_system_bus(connman_t)
+#init_dbus_chat(connman_t)
+unconfined_dbus_chat(connman_t)
+
+gen_require(`
+	type iwd_t;
+')
+connman_dbus_chat(iwd_t)

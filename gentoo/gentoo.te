@@ -1,0 +1,31 @@
+policy_module(gentoo)
+
+gen_require(`
+	type systemd_tmpfiles_t;
+	type portage_tmp_t;
+	type var_run_t;
+	type var_lock_t;
+	type tmpfs_t;
+	type tmpfiles_t;
+	type udev_t;
+	type device_t;
+	type sysfs_t;
+	type hwclock_t;
+	type proc_t;
+	type lvm_t;
+')
+
+allow systemd_tmpfiles_t { portage_tmp_t var_run_t }:dir { create setattr };
+allow systemd_tmpfiles_t var_lock_t:dir create;
+
+allow udev_t sysfs_t:file setattr;
+
+allow hwclock_t proc_t:filesystem getattr;
+
+dontaudit tmpfiles_t tmpfs_t:dir { getattr search };
+dontaudit tmpfiles_t device_t:dir { getattr search };
+
+kernel_dontaudit_search_kernel_sysctl(tmpfiles_t)
+dev_read_rand(lvm_t)
+dev_read_urand(lvm_t)
+dev_rw_null(lvm_t)

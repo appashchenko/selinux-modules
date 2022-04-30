@@ -1,0 +1,88 @@
+policy_module(iwd)
+
+########################################
+#
+# Declarations
+#
+
+gen_require(`
+	type unconfined_t;
+')
+
+attribute iwd_unconfined_type;
+attribute iwd_trusted_procedure_type;
+
+type iwd_t;
+type iwd_exec_t;
+init_daemon_domain(iwd_t, iwd_exec_t)
+application_executable_file(iwd_exec_t)
+
+type iwd_conf_t;
+files_config_file(iwd_conf_t)
+
+type iwd_var_lib_t;
+files_type(iwd_var_lib_t)
+
+type iwd_runtime_t;
+files_runtime_file(iwd_runtime_t)
+mls_trusted_object(iwd_runtime_t)
+
+type iwd_initrc_exec_t;
+init_script_file(iwd_initrc_exec_t)
+
+type iwd_trusted_proc_t;
+domain_type(iwd_trusted_proc_t)
+iwd_unconfined(iwd_trusted_proc_t)
+role system_r types iwd_trusted_proc_t;
+
+
+ifdef(`enable_mls',`
+        init_ranged_daemon_domain(iwd_t, iwd_exec_t, s0 - mls_systemhigh)
+')
+
+########################################
+#
+# Local policy
+#
+allow iwd_t self:capability { net_admin };
+allow iwd_t self:fifo_file rw_fifo_file_perms;
+allow iwd_t self:unix_stream_socket { ioctl read getattr write bind };
+allow iwd_t self:alg_socket { accept bind create read setopt write };
+allow iwd_t self:netlink_route_socket create_netlink_socket_perms;
+allow iwd_t self:netlink_generic_socket create_socket_perms;
+allow iwd_t iwd_runtime_t:file manage_file_perms;
+allow iwd_t iwd_var_lib_t:file { write map };
+allow iwd_t iwd_var_lib_t:dir { watch watch_reads };
+allow unconfined_t iwd_var_lib_t:dir { watch_reads };
+allow iwd_t iwd_conf_t:file { open read getattr map };
+allow iwd_t domain:key { read write search };
+
+allow iwd_t sysctl_net_t:file { getattr open write };
+
+kernel_getattr_proc(iwd_t)
+kernel_search_network_sysctl(iwd_t)
+kernel_request_load_module(iwd_t)
+dev_read_sysfs(iwd_t)
+dev_rw_wireless(iwd_t)
+
+manage_dirs_pattern(iwd_t, iwd_var_lib_t, iwd_var_lib_t)
+manage_files_pattern(iwd_t, iwd_var_lib_t, iwd_var_lib_t)
+manage_lnk_files_pattern(iwd_t, iwd_var_lib_t, iwd_var_lib_t)
+files_runtime_filetrans(iwd_t, iwd_runtime_t, { dir file })
+files_var_lib_filetrans(iwd_t, iwd_var_lib_t, { dir file })
+
+manage_dirs_pattern(iwd_t, iwd_runtime_t, iwd_runtime_t)
+manage_files_pattern(iwd_t, iwd_runtime_t, iwd_runtime_t)
+manage_lnk_files_pattern(iwd_t, iwd_runtime_t, iwd_runtime_t)
+domain_use_interactive_fds(iwd_t)
+domain_read_all_domains_state(iwd_t)
+files_read_etc_files(iwd_t)
+systemd_read_hwdb(iwd_t)
+systemd_map_hwdb(iwd_t)
+miscfiles_read_localization(iwd_t)
+
+dbus_system_domain(iwd_t, iwd_exec_t)
+dbus_connect_system_bus(iwd_t)
+init_dbus_chat(iwd_t)
+unconfined_dbus_send(iwd_t)
+

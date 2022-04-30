@@ -1,0 +1,5 @@
+/root(/.*)?			-d	system_u:object_r:home_root_t:s0
+/run/cryptsetup(/.*)?		-d	system_u:object_r:var_run_t:s0
+/var/db/repos/[^/]+/.git	-d	system_u:object_r:portage_srcrepo_t:s0
+/var/log/wtmp			--	system_u:object_r:wtmp_t:s0
+/home/portage			-d	system_u:object_r:portage_tmp_t:s0

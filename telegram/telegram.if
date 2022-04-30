@@ -1,0 +1,53 @@
+## <summary>Telegram Desktop</summary>
+
+#######################################
+## <summary>
+##      Role access for the telegram module.
+## </summary>
+## <param name="role">
+##      <summary>
+##      The role associated with the user domain.
+##      </summary>
+## </param>
+## <param name="user_domain">
+##      <summary>
+##      The type of the user domain.
+##      </summary>
+## </param>
+## <param name="user_exec_domain">
+##      <summary>
+##      User exec domain for execute and transition access.
+##      </summary>
+## </param>
+## <param name="role">
+##      <summary>
+##      Role allowed access
+##      </summary>
+#
+template(`telegram_role',`
+	gen_require(`
+		attribute_role telegram_roles;
+		type telegram_t, telegram_exec_t, telegram_home_t;
+	')
+ 
+        ########################################
+        #
+        # Declarations
+        #
+
+        roleattribute $4 telegram_roles;
+
+        ########################################
+        #
+        # Policy
+        #
+
+	domtrans_pattern($3, telegram_exec_t, telegram_t)
+
+	ps_process_pattern($3, telegram_t)
+	allow $3 telegram_t:process { ptrace signal_perms };
+
+	manage_dirs_pattern($2, telegram_home_t, telegram_home_t)
+	manage_files_pattern($2, telegram_home_t, telegram_home_t)
+	manage_lnk_files_pattern($2, telegram_home_t, telegram_home_t)
+')

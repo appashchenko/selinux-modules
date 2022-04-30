@@ -1,0 +1,41 @@
+policy_module(sway)
+
+attribute_role sway_roles;
+roleattribute system_r sway_roles;
+
+type sway_t;
+type sway_exec_t;
+application_domain(sway_t, sway_exec_t)
+application_executable_file(sway_exec_t)
+role sway_roles types sway_t;
+
+#allow sway_t self:capability { setgid setuid };
+#allow sway_t self:process { fork setrlimit };
+#allow sway_t self:fifo_file manage_fifo_file_perms;
+#allow sway_t self:unix_stream_socket create_stream_socket_perms;
+
+domain_use_interactive_fds(sway_t)
+
+#files_read_etc_files(sway_t)
+
+#miscfiles_read_localization(sway_t)
+
+seatd_ro_socket(sway_t)
+
+optional_policy(`
+	gen_require(`
+		type user_t;
+		role user_r;
+	')
+
+	sway_run(user_t, user_r)
+')
+
+optional_policy(`
+	gen_require(`
+		type staff_t;
+		role staff_r;
+	')
+
+	sway_run(staff_t, staff_r)
+')

@@ -1,0 +1,100 @@
+policy_module(telegram)
+
+############################
+#
+# Declarations
+#
+
+attribute_role telegram_roles;
+
+type telegram_t;
+type telegram_exec_t;
+userdom_user_application_domain(telegram_t, telegram_exec_t)
+role telegram_roles types telegram_t;
+
+type telegram_home_t;
+userdom_user_home_dir_filetrans(telegram_t, telegram_home_t, dir)
+userdom_user_home_content(telegram_home_t)
+
+############################
+#
+# Policy
+#
+
+allow telegram_t self:process { getsched setsched execmem signal };
+allow telegram_t self:fifo_file rw_fifo_file_perms;
+allow telegram_t self:unix_stream_socket create_socket_perms;
+allow telegram_t self:sem create_sem_perms;
+allow telegram_t self:tcp_socket create_stream_socket_perms;
+
+allow telegram_t telegram_exec_t:file execmod;
+
+manage_dirs_pattern(telegram_t, telegram_home_t, telegram_home_t)
+manage_files_pattern(telegram_t, telegram_home_t, telegram_home_t)
+manage_lnk_files_pattern(telegram_t, telegram_home_t, telegram_home_t)
+
+kernel_read_network_state(telegram_t)
+kernel_read_system_state(telegram_t)
+
+corecmd_exec_bin(telegram_t)
+corecmd_exec_shell(telegram_t)
+
+can_exec(telegram_t, telegram_exec_t)
+
+corenet_all_recvfrom_netlabel(telegram_t)
+corenet_all_recvfrom_unlabeled(telegram_t)
+corenet_sendrecv_http_client_packets(telegram_t)
+corenet_tcp_bind_generic_node(telegram_t)
+corenet_tcp_bind_generic_port(telegram_t)
+corenet_tcp_connect_all_unreserved_ports(telegram_t)
+corenet_tcp_connect_generic_port(telegram_t)
+corenet_tcp_connect_http_port(telegram_t)
+corenet_udp_bind_generic_node(telegram_t)
+corenet_udp_bind_generic_port(telegram_t)
+
+dev_dontaudit_search_sysfs(telegram_t)
+dev_dontaudit_read_sysfs(telegram_t)
+dev_read_sound(telegram_t)
+dev_read_video_dev(telegram_t)
+dev_write_sound(telegram_t)
+dev_write_video_dev(telegram_t)
+
+domain_dontaudit_use_interactive_fds(telegram_t)
+
+files_read_etc_files(telegram_t)
+files_read_usr_files(telegram_t)
+
+fs_dontaudit_getattr_tmpfs(telegram_t)
+fs_dontaudit_getattr_xattr_fs(telegram_t)
+
+auth_use_nsswitch(telegram_t)
+
+miscfiles_dontaudit_setattr_fonts_dirs(telegram_t)
+miscfiles_read_generic_certs(telegram_t)
+miscfiles_read_localization(telegram_t)
+
+userdom_dontaudit_use_user_ttys(telegram_t)
+userdom_use_user_ptys(telegram_t)
+
+optional_policy(`
+	pulseaudio_domtrans(telegram_t)
+')
+
+optional_policy(`
+	dbus_system_bus_client(telegram_t)
+	dbus_all_session_bus_client(telegram_t)
+')
+
+optional_policy(`
+	xdg_manage_config_home(telegram_t)
+')
+
+ifdef(`use_alsa',`
+	optional_policy(`
+		alsa_domain(telegram_t, telegram_tmpfs_t)
+	')
+')
+
+optional_policy(`
+        seutil_use_newrole_fds(telegram_t)
+')

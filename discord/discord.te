@@ -1,0 +1,40 @@
+policy_module(discord, 1.0.0)
+
+########################################
+#
+# Declarations
+#
+
+attribute_role discord_roles;
+roleattribute system_r discord_roles;
+
+type discord_t;
+type discord_exec_t;
+application_domain(discord_t, discord_exec_t)
+role discord_roles types discord_t;
+
+type discord_home_t;
+
+type discord_opt_t;
+
+type discord_conf_t;
+
+########################################
+#
+# discord local policy
+#
+#allow discord_t self:capability { chown setgid setuid sys_chroot };
+#allow discord_t self:process { fork setpgid setrlimit signal_perms };
+
+#allow discord_t self:fifo_file manage_fifo_file_perms;
+#allow discord_t self:unix_stream_socket create_stream_socket_perms;
+
+domain_use_interactive_fds(discord_t)
+#auth_use_nsswitch(discord_t)
+
+#miscfiles_read_localization(discord_t)
+
+optional_policy(`
+	dbus_system_bus_client(discord_t)
+	dbus_connect_system_bus(discord_t)
+')

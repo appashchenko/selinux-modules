@@ -1,0 +1,4 @@
+/usr/bin/sway		--	gen_context(system_u:object_r:sway_exec_t,s0)
+/usr/bin/swaymsg	--	gen_context(system_u:object_r:sway_exec_t,s0)
+/usr/bin/swaybar	--	gen_context(system_u:object_r:sway_exec_t,s0)
+/usr/bin/swaynag	--	gen_context(system_u:object_r:sway_exec_t,s0)

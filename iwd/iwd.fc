@@ -1,0 +1,9 @@
+/usr/bin/iwctl		--	gen_context(system_u:object_r:iwd_exec_t,s0)
+/usr/bin/iwmon		--	gen_context(system_u:object_r:iwd_exec_t,s0)
+/usr/libexec/iwd	--	gen_context(system_u:object_r:iwd_exec_t,s0)
+/var/lib/iwd(/.*)?		gen_context(system_u:object_r:iwd_var_lib_t,s0)
+/run/iwd.pid		--	gen_context(system_u:object_r:iwd_runtime_t,s0)
+/etc/iwd/main.conf		gen_context(system_u:object_r:iwd_conf_t,s0)
+/etc/rc\.d/init\.d/iwd		gen_context(system_u:object_r:iwd_initrc_exec_t,s0)
+/etc/rc\.d/init\.d/ead		gen_context(system_u:object_r:iwd_initrc_exec_t,s0)
+

@@ -1,0 +1,25 @@
+policy_module(foot, 1.0.0)
+
+type foot_t;
+type foot_exec_t;
+type foot_home_t;
+type foot_conf_t;
+type foot_socket_t;
+
+files_config_file(foot_conf_t)
+corenet_port(myapp_port_t)
+
+application_domain(foot_t, foot_exec_t)
+init_daemon_domain(myapp_t, myapp_exec_t)
+corecmd_exec_bin(myapp_t)
+libs_use_ld_so(myapp_t)
+kernel_read_system_state(myapp_t)
+files_rw_generic_tmp_dir(myapp_t)
+sysnet_read_config(myapp_t)
+dev_read_rand(myapp_t)
+fs_getattr_xattr_fs(myapp_t)
+sysnet_dns_name_resolve(myapp_t)
+logging_search_logs(myapp_t)
+logging_log_filetrans(myapp_t, myapp_log_t, file)
+files_poly_member_tmp(myapp_t, myapp_tmp_t)
+allow user_t var_log_t:dir { getattr search open read };

@@ -1,0 +1,2 @@
+/usr/bin/bemenu		--	gen_context(system_u:object_r:bemenu_exec_t,s0)
+/usr/bin/bemenu-run	--	gen_context(system_u:object_r:bemenu_exec_t,s0)
